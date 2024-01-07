@@ -3,26 +3,6 @@ from langchain.schema.messages import SystemMessage, HumanMessage
 from langchain.prompts import SystemMessagePromptTemplate, PromptTemplate, HumanMessagePromptTemplate
 from task import Task, TaskCaseType
 
-## Vision models token limit of 4096 is too low to allow the model to make sense of what it is seeing, so I omit them from the prompt
-def generate_objects(task: Task):
-    objects = []
-
-    for case in task.cases:
-        if case.type == TaskCaseType.TRAIN:
-            input_text_object = {"type": "text", "text": "input_matrix:" + str(case.input_matrix.tolist()).strip() + "\n input_image:"}
-            input_image_object = {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{case.input_image}"}}
-            
-            output_text_object = {"type": "text", "text": "output_matrix:" + str(case.output_matrix.tolist()).strip() + "\n output_image:"}
-            output_image_object = {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{case.output_image}"}}
-
-            objects.append(input_text_object)
-            # objects.append(input_image_object)
-            objects.append(output_text_object)
-            # objects.append(output_image_object)
-                
-
-    return objects
-
 system_message = '''  - As a specialized pattern recognition model, your task is to analyze example input and output matrices, identifying the single transformation rule and applying that transformation rule to the given input matrix.
 
 The grids contain numbers from 0-9 inclusively and are intentionally arranged to display some rule/pattern.
@@ -64,9 +44,6 @@ Generate an Output Matrix:
    - Once the reasoning is verified, use the same pattern to generate an output matrix for the given input matrix.
 '''
 
-
-
-
 human_message = '''Find the output for the given input_matrix:
 
 Input Matrix:
@@ -78,7 +55,6 @@ Provide the output in the following structure as JSON and only the json and noth
     "reasoning": 
         "output_dimension_selection_logic": [],  # List of strings describing notable patterns, symmetries, or features influencing the output size
         "operation_descriptions": []  # List of strings describing mathematical operations, transformations, or relationships involved
-    
 
 '''
 
@@ -107,6 +83,26 @@ class OutputParser(BaseModel):
 
 parser = PydanticOutputParser(pydantic_object=OutputParser)
 
+
+## Vision models token limit of 4096 is too low to allow the model to make sense of what it is seeing, so I omit them from the prompt
+def generate_objects(task: Task):
+    objects = []
+
+    for case in task.cases:
+        if case.type == TaskCaseType.TRAIN:
+            input_text_object = {"type": "text", "text": "input_matrix:" + str(case.input_matrix.tolist()).strip() + "\n input_image:"}
+            input_image_object = {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{case.input_image}"}}
+            
+            output_text_object = {"type": "text", "text": "output_matrix:" + str(case.output_matrix.tolist()).strip() + "\n output_image:"}
+            output_image_object = {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{case.output_image}"}}
+
+            objects.append(input_text_object)
+            # objects.append(input_image_object)
+            objects.append(output_text_object)
+            # objects.append(output_image_object)
+                
+
+    return objects
 
 ## indexing and referencing previously succesful reasonings can help with more complex tasks, need to read more about LangChain's API and implement a RAG system
 def run_model(task: Task) -> list():

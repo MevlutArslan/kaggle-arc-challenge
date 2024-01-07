@@ -11,7 +11,6 @@ Randomly picking 5 tasks repetitively in the evaluation set usually resulted in 
 - The model performed pretty well with smaller grids.
 
 **Improving Chain Performance:**
-There are a few methods that might improve the performance of the chain:
 
 **Indexing Previously Successful Reasonings:**
 - Having the model fill in and return reasoning structures, then indexing the successful ones and reusing them, could help improve its reasoning ability.
